@@ -1,0 +1,14 @@
+*{
+    text-decoration: none;
+    list-style: none;
+}
+.app{
+    display: block;
+    background: #18001f;
+    min-height: 100vh;
+    color: #ffffff;
+    font-family: "Mulish", sans-serif;
+    /* <uniquifier>: Use a unique and descriptive class name */
+    /* <weight>: Use a value from 200 to 1000 */
+
+}

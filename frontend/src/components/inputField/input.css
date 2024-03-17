@@ -1,0 +1,29 @@
+.input__container{
+    display: flex;
+    justify-content: center;
+    align-items: start;
+    flex-direction: column;
+    margin-bottom: 0.8rem;
+    width: 100%;
+}
+.input__container input{
+    width: inherit;
+    padding: 0.8rem;
+    border: 2px solid transparent;
+    outline: none;
+    border-radius: 4px;
+    font-size: 18px;
+    font-weight: 400;
+    transition: all .5s ease;
+}
+.input__container input:focus{
+    border: 2px solid #00ffbb;
+}
+.input__container label{
+    font-size: 18px;
+    margin-bottom: 5px;
+}
+.input__container .error{
+    color: #ff1313;
+    height: 10px;
+}
