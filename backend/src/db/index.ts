@@ -12,5 +12,5 @@ export const db = new DataSource({
   database: "otp_db",
   synchronize: true,
   entities: ["src/entity/**/*{.ts, .js}"],
-  logging: true,
+  // logging: true,
 });

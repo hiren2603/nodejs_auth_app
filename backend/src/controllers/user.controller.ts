@@ -2,13 +2,14 @@ import { Request, Response } from "express";
 import { User } from "../entity/User";
 import { db } from "../db";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
+import { ApiError } from "../utils/ApiError";
 import { generateAccessToken } from "../utils/GenerateToken";
 
 const userRepo = db.getRepository(User);
 
 // const tokenSecret:string = process.env.ACCESS_TOKEN_SECRET
 export async function ragister(req: Request, res: Response) {
+  console.log(req.body);
   const {
     firstname,
     lastname,
@@ -27,21 +28,28 @@ export async function ragister(req: Request, res: Response) {
       phone,
       password,
       confirmPassword,
-    ].some((field: string) => field?.trim() === "")
+    ].some((field: string) => field.trim() === "")
   )
-    return res.status(400).json({ error: "All fields are Required!" });
+    throw new ApiError(400, "All fields are required");
+  // return res.status(400).json({ error: "All fields are Required!" });
 
   if (phone.length !== 13)
-    return res.status(400).json({ error: "phone number must be 13 digit" });
+    throw new ApiError(400, "phone number must be 13 digit");
+  // return res.status(400).json({ error: "phone number must be 13 digit" });
   const existedUser = await userRepo.findOne({
     where: [{ username }, { email }, { phone }],
   });
   if (existedUser)
-    return res
-      .status(400)
-      .json("User with given email, phone or username allready exist!!");
+    throw new ApiError(
+      400,
+      "User with given email, phone or username allready exist!!"
+    );
+  // return res
+  // .status(400)
+  // .json("User with given email, phone or username allready exist!!");
   if (password !== confirmPassword)
-    return res.status(500).json("Password does not match!!");
+    throw new ApiError(400, "Password does not match!!");
+  // return res.status(500).json("Password does not match!!");
 
   let avatar;
   if (req.file) {
@@ -63,7 +71,8 @@ export async function ragister(req: Request, res: Response) {
     await userRepo.insert(user);
     return res.status(200).json({ success: "Account created successfully!!" });
   } catch (error) {
-    console.log({ message: "Something went wrong While creating user", error });
+    throw new ApiError(500, "Something went wrong while registering the user");
+    // console.log({ message: "Something went wrong While creating user", error });
   }
 }
 
@@ -74,6 +83,7 @@ export async function login(req: Request, res: Response) {
   if (!foundUser)
     return res.status(404).json({ error: "User does not exist!!" });
   const isVarified = bcrypt.compareSync(req.body.password, foundUser.password);
+  console.log(isVarified);
   if (!isVarified)
     return res
       .status(500)
@@ -85,9 +95,10 @@ export async function login(req: Request, res: Response) {
   return res
     .cookie("accessToken", token, {
       httpOnly: true,
+      secure: true,
     })
     .status(200)
-    .json({ success: "Login successfull!", user });
+    .json({ ...user, token: token, success: "Login successfull!" });
 }
 
 export async function getAllUsers(req: Request, res: Response) {
@@ -124,6 +135,12 @@ export async function logoutUser(req: Request, res: Response) {
 
 export async function deleteUser(req: Request, res: Response) {
   const userId = req.params.userId;
-  const result = await userRepo.delete(userId);
+  await userRepo.delete(userId);
   return res.status(200).json({ message: "User deleted successfully!" });
+}
+
+export async function findUserById(req: Request, res: Response) {
+  const currentUser = await userRepo.findOneBy({ id: req.body.userId });
+  console.log(currentUser);
+  return res.status(200).json(currentUser);
 }
